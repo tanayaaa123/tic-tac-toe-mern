@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background: linear-gradient(135deg, #5c3a21, #8b5a2b);
+  font-family: sans-serif;
+}
+
+/* 🪵 Panel */
+.panel {
+  @apply bg-[#3b2a1a] text-white p-8 rounded-2xl shadow-2xl;
+}
+
+/* 🎯 Button */
+.btn {
+  @apply px-6 py-3 bg-yellow-700 text-white rounded-lg 
+  hover:bg-yellow-800 hover:scale-105 transition;
+}
+
+/* 🎮 Grid box */
+.box {
+  @apply w-20 h-20 flex items-center justify-center text-2xl font-bold 
+  bg-[#8b5a2b] text-white rounded cursor-pointer 
+  hover:scale-110 transition;
+}
+
+/* 🪟 Popup */
+.popup {
+  @apply fixed inset-0 flex items-center justify-center bg-black bg-opacity-60;
+}
+
+/* 🎯 Winning */
+.win {
+  background-color: #22c55e !important;
+}
