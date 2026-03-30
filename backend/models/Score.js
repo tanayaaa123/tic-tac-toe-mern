@@ -7,7 +7,7 @@ const ScoreSchema = new mongoose.Schema(
     losses:     { type: Number, default: 0 },
     draws:      { type: Number, default: 0 },
     gameMode:   { type: String, enum: ['ai', 'friend'], required: true },
-    gridSize:   { type: Number, enum: [3, 5, 7], required: true },
+    gridSize:   { type: Number, enum: [3], required: true },
   },
   { timestamps: true }
 );

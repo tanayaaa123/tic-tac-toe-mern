@@ -2,20 +2,91 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useScores } from '../context/ScoreContext.jsx';
 
-// ── Mini animated board decoration ──────────────────────────────
+// Mini animated board decoration 
+
+
 function DecorBoard() {
   return (
-    <div style={dec.wrap}>
+    <div style={{
+      ...dec.wrap,
+      display: 'grid',
+      gridTemplateColumns: 'repeat(3, 1fr)',
+      gridTemplateRows: 'repeat(3, 1fr)',
+    }}>
+      {/* Grid lines */}
       <div style={dec.vLine1} />
       <div style={dec.vLine2} />
       <div style={dec.hLine1} />
       <div style={dec.hLine2} />
-      <span style={{ ...dec.sym, top: '10%', left: '12%', color: 'var(--x-col)', textShadow: '0 0 18px var(--x-glow)', fontSize: '1.3rem' }}>X</span>
-      <span style={{ ...dec.sym, top: '38%', left: '38%', color: 'var(--o-col)', textShadow: '0 0 18px var(--o-glow)', fontSize: '1.5rem' }}>O</span>
-      <span style={{ ...dec.sym, bottom: '10%', right: '12%', color: 'var(--x-col)', textShadow: '0 0 18px var(--x-glow)', fontSize: '1.3rem' }}>X</span>
+
+      {/* X top-left */}
+      <div style={{ position: 'relative' }}>
+        <span style={{
+          ...dec.sym,
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          color: 'var(--x-col)',
+          textShadow: '0 0 18px var(--x-glow)',
+          fontSize: '1.3rem'
+        }}>
+          X
+        </span>
+      </div>
+
+      {/* empty */}
+      <div />
+      <div />
+
+      {/* empty */}
+      <div />
+
+      {/* O center */}
+      <div style={{ position: 'relative' }}>
+        <span style={{
+          ...dec.sym,
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          color: 'var(--o-col)',
+          textShadow: '0 0 18px var(--o-glow)',
+          fontSize: '1.5rem'
+        }}>
+          O
+        </span>
+      </div>
+
+      {/* empty */}
+      <div />
+
+      {/* empty */}
+      <div />
+      <div />
+
+      {/* X bottom-right */}
+      <div style={{ position: 'relative' }}>
+        <span style={{
+          ...dec.sym,
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          color: 'var(--x-col)',
+          textShadow: '0 0 18px var(--x-glow)',
+          fontSize: '1.3rem'
+        }}>
+          X
+        </span>
+      </div>
     </div>
   );
 }
+
+
+
+
 
 const dec = {
   wrap: { width: 90, height: 90, position: 'relative', border: '2px solid var(--border-hi)', borderRadius: 10, overflow: 'hidden', animation: 'float 3s ease-in-out infinite' },
@@ -69,7 +140,7 @@ const mc = {
   playBtn: { color: '#fff', fontWeight: 700, fontSize: '0.85rem', padding: '9px 22px', borderRadius: 30, marginTop: 6, letterSpacing: '0.4px' },
 };
 
-// ── Stat number ──────────────────────────────────────────────────
+// Stat number 
 function Stat({ label, val, col }) {
   return (
     <div style={{ textAlign: 'center', minWidth: 65 }}>
@@ -79,7 +150,7 @@ function Stat({ label, val, col }) {
   );
 }
 
-// ── Home Page ────────────────────────────────────────────────────
+//  Home Page 
 export default function Home() {
   const navigate = useNavigate();
   const { scores, resetScores } = useScores();
@@ -102,7 +173,7 @@ export default function Home() {
           </span>
         </h1>
         <p style={{ color: 'var(--text2)', fontSize: '0.97rem', maxWidth: 360, lineHeight: 1.6 }}>
-          Challenge the AI powered by Minimax + Alpha-Beta Pruning, or play with a friend on 3×3, 5×5, and 7×7 grids.
+          Challenge yourself against our unbeatable AI or have fun with a friend. Track your stats and become the ultimate Tic Tac Toe champion!
         </p>
       </div>
 
@@ -110,8 +181,8 @@ export default function Home() {
       <div style={{ display: 'flex', gap: 22, flexWrap: 'wrap', justifyContent: 'center' }}>
         <ModeCard
           icon="🤖"
-          title="Play vs AI"
-          desc="Face our Minimax AI with Alpha-Beta Pruning. Difficulty scales with grid size."
+          title="Play with Computer"
+          desc="Challenge our unbeatable AI in a game of Tic Tac Toe."
           badge="Single Player"
           accentVar="--accent"
           glowVar="--accent-glow"
@@ -121,7 +192,7 @@ export default function Home() {
         <ModeCard
           icon="👥"
           title="Play with Friend"
-          desc="Take turns on the same device. Choose a grid and see who wins!"
+          desc="Enjoy a classic game of Tic Tac Toe with your friend on the same device."
           badge="Two Players"
           accentVar="--cyan"
           glowVar="--cyan-glow"

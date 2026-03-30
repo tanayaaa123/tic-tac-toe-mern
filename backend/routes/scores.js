@@ -1,8 +1,9 @@
+
 const express = require('express');
 const router  = express.Router();
 const Score   = require('../models/Score');
 
-// GET  /api/scores  — all scores sorted by wins
+// GET all scores
 router.get('/', async (_req, res) => {
   try {
     const data = await Score.find().sort({ wins: -1 });
@@ -12,7 +13,7 @@ router.get('/', async (_req, res) => {
   }
 });
 
-// GET  /api/scores/player/:name  — scores for one player
+// GET scores for one player
 router.get('/player/:name', async (req, res) => {
   try {
     const data = await Score.find({ playerName: req.params.name });
@@ -22,42 +23,50 @@ router.get('/player/:name', async (req, res) => {
   }
 });
 
-// GET  /api/scores/leaderboard/:gameMode/:gridSize
-router.get('/leaderboard/:gameMode/:gridSize', async (req, res) => {
+// GET leaderboard (3x3 only)
+router.get('/leaderboard/:gameMode', async (req, res) => {
   try {
-    const { gameMode, gridSize } = req.params;
+    const { gameMode } = req.params;
+
     const data = await Score.find({
       gameMode,
-      gridSize: parseInt(gridSize),
+      gridSize: 3, 
     })
       .sort({ wins: -1 })
       .limit(10);
+
     res.json({ success: true, data });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
 
-// POST /api/scores/update
-// body: { playerName, result ('win'|'loss'|'draw'), gameMode, gridSize }
+// POST update score
 router.post('/update', async (req, res) => {
   try {
-    const { playerName, result, gameMode, gridSize } = req.body;
+    const { playerName, result, gameMode } = req.body;
 
-    if (!playerName || !result || !gameMode || !gridSize) {
-      return res
-        .status(400)
-        .json({ success: false, error: 'playerName, result, gameMode and gridSize are required' });
+    if (!playerName || !result || !gameMode) {
+      return res.status(400).json({
+        success: false,
+        error: 'playerName, result, gameMode are required',
+      });
     }
 
     if (!['win', 'loss', 'draw'].includes(result)) {
-      return res.status(400).json({ success: false, error: 'result must be win | loss | draw' });
+      return res.status(400).json({
+        success: false,
+        error: 'result must be win | loss | draw',
+      });
     }
 
-    const field = result === 'win' ? 'wins' : result === 'loss' ? 'losses' : 'draws';
+    const field =
+      result === 'win' ? 'wins' :
+      result === 'loss' ? 'losses' :
+      'draws';
 
     const score = await Score.findOneAndUpdate(
-      { playerName, gameMode, gridSize: parseInt(gridSize) },
+      { playerName, gameMode, gridSize: 3 }, 
       { $inc: { [field]: 1 } },
       { new: true, upsert: true }
     );
@@ -68,7 +77,7 @@ router.post('/update', async (req, res) => {
   }
 });
 
-// DELETE /api/scores/reset/:name
+// DELETE reset scores
 router.delete('/reset/:name', async (req, res) => {
   try {
     await Score.deleteMany({ playerName: req.params.name });

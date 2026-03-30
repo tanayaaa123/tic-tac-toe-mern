@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 const GRIDS = [
@@ -13,31 +14,9 @@ const GRIDS = [
     glow: 'rgba(0,229,160,0.30)',
     icon: '⚡',
   },
-  {
-    size: 5,
-    label: '5 × 5',
-    winLen: 4,
-    winMsg: '4 in a row to win',
-    desc: 'Bigger board, deeper thinking required.',
-    badge: 'Hard',
-    accent: 'var(--accent)',
-    glow: 'var(--accent-glow)',
-    icon: '🔥',
-  },
-  {
-    size: 7,
-    label: '7 × 7',
-    winLen: 5,
-    winMsg: '5 in a row to win',
-    desc: 'Maximum strategy. Masters only.',
-    badge: 'Expert',
-    accent: 'var(--danger)',
-    glow: 'rgba(255,77,109,0.30)',
-    icon: '💀',
-  },
 ];
 
-// ── Mini Grid Preview ──────────────────────────────────────────
+// Mini Grid Preview 
 function MiniGrid({ size, active, accent }) {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: `repeat(${size}, 1fr)`, gap: 2, width: 84, height: 84 }}>
@@ -56,7 +35,7 @@ function MiniGrid({ size, active, accent }) {
   );
 }
 
-// ── Grid Card ──────────────────────────────────────────────────
+// Grid Card
 function GridCard({ g, delay, onClick }) {
   const [hov, setHov] = useState(false);
 
@@ -84,35 +63,58 @@ function GridCard({ g, delay, onClick }) {
         animation: `fadeUp 0.5s ease ${delay}s both`,
       }}
     >
-      {/* Icon + Badge */}
       <div style={{ fontSize: '2rem' }}>{g.icon}</div>
-      <span style={{ fontSize: '0.62rem', fontWeight: 800, letterSpacing: '1.2px', textTransform: 'uppercase', padding: '3px 10px', borderRadius: 20, color: g.accent, border: `1px solid ${g.accent}`, background: `color-mix(in srgb, ${g.accent} 10%, transparent)` }}>
+
+      <span style={{
+        fontSize: '0.62rem',
+        fontWeight: 800,
+        letterSpacing: '1.2px',
+        textTransform: 'uppercase',
+        padding: '3px 10px',
+        borderRadius: 20,
+        color: g.accent,
+        border: `1px solid ${g.accent}`,
+        background: `color-mix(in srgb, ${g.accent} 10%, transparent)`
+      }}>
         {g.badge}
       </span>
 
-      {/* Grid size label */}
-      <h2 style={{ fontFamily: 'Orbitron, monospace', fontSize: '1.5rem', fontWeight: 900, color: hov ? g.accent : 'var(--text)', transition: 'color 0.25s', letterSpacing: '2px' }}>
+      <h2 style={{
+        fontFamily: 'Orbitron, monospace',
+        fontSize: '1.5rem',
+        fontWeight: 900,
+        color: hov ? g.accent : 'var(--text)',
+        transition: 'color 0.25s',
+        letterSpacing: '2px'
+      }}>
         {g.label}
       </h2>
 
-      {/* Mini preview */}
       <MiniGrid size={g.size} active={hov} accent={g.accent} />
 
-      {/* Description */}
-      <p style={{ color: 'var(--text2)', fontSize: '0.8rem', lineHeight: 1.55 }}>{g.desc}</p>
+      <p style={{ color: 'var(--text2)', fontSize: '0.8rem', lineHeight: 1.55 }}>
+        {g.desc}
+      </p>
 
-      {/* Win condition */}
-      <div style={{ background: `color-mix(in srgb, ${g.accent} 10%, transparent)`, border: `1px solid color-mix(in srgb, ${g.accent} 30%, transparent)`, borderRadius: 8, padding: '7px 14px', width: '100%' }}>
-        <span style={{ color: g.accent, fontWeight: 700, fontSize: '0.8rem' }}>{g.winMsg}</span>
+      <div style={{
+        background: `color-mix(in srgb, ${g.accent} 10%, transparent)`,
+        border: `1px solid color-mix(in srgb, ${g.accent} 30%, transparent)`,
+        borderRadius: 8,
+        padding: '7px 14px',
+        width: '100%'
+      }}>
+        <span style={{ color: g.accent, fontWeight: 700, fontSize: '0.8rem' }}>
+          {g.winMsg}
+        </span>
       </div>
     </div>
   );
 }
 
-// ── Page ───────────────────────────────────────────────────────
+// Page
 export default function GridSelect() {
   const { mode } = useParams();
-  const navigate  = useNavigate();
+  const navigate = useNavigate();
   const isAi = mode === 'ai';
 
   const handlePick = (size) => {
@@ -123,37 +125,99 @@ export default function GridSelect() {
     <div className="page">
       {/* Header */}
       <div style={{ textAlign: 'center', animation: 'fadeUp 0.45s ease both' }}>
-        <div style={{ display: 'inline-block', background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 30, padding: '5px 18px', fontSize: '0.78rem', fontWeight: 700, color: 'var(--text2)', marginBottom: 14 }}>
-          {isAi ? '🤖 Player vs AI' : '👥 Player vs Player'}
+        <div style={{
+          display: 'inline-block',
+          background: 'var(--card)',
+          border: '1px solid var(--border)',
+          borderRadius: 30,
+          padding: '5px 18px',
+          fontSize: '0.78rem',
+          fontWeight: 700,
+          color: 'var(--text2)',
+          marginBottom: 14
+        }}>
+          {isAi ? 'Player vs AI' : 'Player vs Player'}
         </div>
-        <h1 style={{ fontSize: 'clamp(1.4rem,4vw,2.1rem)', fontWeight: 900, letterSpacing: '1px', color: 'var(--text)' }}>
+
+        <h1 style={{
+          fontSize: 'clamp(1.4rem,4vw,2.1rem)',
+          fontWeight: 900,
+          letterSpacing: '1px',
+          color: 'var(--text)'
+        }}>
           Choose Your Arena
         </h1>
-        <p style={{ color: 'var(--text2)', fontSize: '0.92rem', marginTop: 8, maxWidth: 380 }}>
+
+        <p style={{
+          color: 'var(--text2)',
+          fontSize: '0.92rem',
+          marginTop: 8,
+          maxWidth: 380
+        }}>
           {isAi
-            ? 'Larger grids = deeper AI search. Choose wisely.'
-            : 'Pick a grid size and start the battle.'}
+            ? 'Play against AI on a classic 3×3 grid.'
+            : 'Play against a friend on a 3×3 grid.'}
         </p>
       </div>
 
       {/* Cards */}
-      <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', justifyContent: 'center', alignItems: 'flex-start' }}>
+      <div style={{
+        display: 'flex',
+        gap: 20,
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+        alignItems: 'flex-start'
+      }}>
         {GRIDS.map((g, i) => (
-          <GridCard key={g.size} g={g} delay={0.15 + i * 0.1} onClick={() => handlePick(g.size)} />
+          <GridCard
+            key={g.size}
+            g={g}
+            delay={0.15 + i * 0.1}
+            onClick={() => handlePick(g.size)}
+          />
         ))}
       </div>
 
-      {/* Rules legend */}
-      <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-m)', padding: '18px 28px', animation: 'fadeUp 0.5s ease 0.55s both' }}>
-        <div style={{ fontSize: '0.72rem', color: 'var(--muted)', letterSpacing: '2px', textTransform: 'uppercase', fontWeight: 700, textAlign: 'center', marginBottom: 12 }}>
-          📋 Win Conditions
+      {/* Rules */}
+      <div style={{
+        background: 'var(--card)',
+        border: '1px solid var(--border)',
+        borderRadius: 'var(--radius-m)',
+        padding: '18px 28px',
+        animation: 'fadeUp 0.5s ease 0.55s both'
+      }}>
+        <div style={{
+          fontSize: '0.72rem',
+          color: 'var(--muted)',
+          letterSpacing: '2px',
+          textTransform: 'uppercase',
+          fontWeight: 700,
+          textAlign: 'center',
+          marginBottom: 12
+        }}>
+          Win Conditions
         </div>
-        <div style={{ display: 'flex', gap: '16px 30px', flexWrap: 'wrap', justifyContent: 'center' }}>
+
+        <div style={{
+          display: 'flex',
+          gap: '16px 30px',
+          flexWrap: 'wrap',
+          justifyContent: 'center'
+        }}>
           {GRIDS.map((g) => (
             <div key={g.size} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontFamily: 'Orbitron, monospace', fontWeight: 700, fontSize: '0.8rem', color: 'var(--text)' }}>{g.label}</span>
+              <span style={{
+                fontFamily: 'Orbitron, monospace',
+                fontWeight: 700,
+                fontSize: '0.8rem',
+                color: 'var(--text)'
+              }}>
+                {g.label}
+              </span>
               <span style={{ color: 'var(--muted)' }}>→</span>
-              <span style={{ color: g.accent, fontWeight: 700, fontSize: '0.82rem' }}>{g.winMsg}</span>
+              <span style={{ color: g.accent, fontWeight: 700, fontSize: '0.82rem' }}>
+                {g.winMsg}
+              </span>
             </div>
           ))}
         </div>
