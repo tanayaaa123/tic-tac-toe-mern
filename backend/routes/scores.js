@@ -1,9 +1,8 @@
-
 const express = require('express');
-const router  = express.Router();
-const Score   = require('../models/Score');
+const router = express.Router();
+const Score = require('../models/Score');
 
-// GET all scores
+/* GET /api/scores — get all scores sorted by wins */
 router.get('/', async (_req, res) => {
   try {
     const data = await Score.find().sort({ wins: -1 });
@@ -13,7 +12,7 @@ router.get('/', async (_req, res) => {
   }
 });
 
-// GET scores for one player
+/* GET /api/scores/player/:name — get scores for a specific player */
 router.get('/player/:name', async (req, res) => {
   try {
     const data = await Score.find({ playerName: req.params.name });
@@ -23,50 +22,45 @@ router.get('/player/:name', async (req, res) => {
   }
 });
 
-// GET leaderboard (3x3 only)
+/* GET /api/scores/leaderboard/:gameMode — top 10 for ai or friend mode */
 router.get('/leaderboard/:gameMode', async (req, res) => {
   try {
-    const { gameMode } = req.params;
-
-    const data = await Score.find({
-      gameMode,
-      gridSize: 3, 
-    })
+    const data = await Score.find({ gameMode: req.params.gameMode, gridSize: 3 })
       .sort({ wins: -1 })
       .limit(10);
-
     res.json({ success: true, data });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
 
-// POST update score
+/* POST /api/scores/update — save a game result
+   Body: { playerName, result ('win'|'loss'|'draw'), gameMode ('ai'|'friend') } */
 router.post('/update', async (req, res) => {
   try {
     const { playerName, result, gameMode } = req.body;
 
+    // Validate required fields
     if (!playerName || !result || !gameMode) {
       return res.status(400).json({
         success: false,
-        error: 'playerName, result, gameMode are required',
+        error: 'playerName, result, and gameMode are required',
       });
     }
 
     if (!['win', 'loss', 'draw'].includes(result)) {
       return res.status(400).json({
         success: false,
-        error: 'result must be win | loss | draw',
+        error: 'result must be win, loss, or draw',
       });
     }
 
-    const field =
-      result === 'win' ? 'wins' :
-      result === 'loss' ? 'losses' :
-      'draws';
+    // Map result to the correct field name
+    const field = result === 'win' ? 'wins' : result === 'loss' ? 'losses' : 'draws';
 
+    // Find existing record or create a new one (upsert)
     const score = await Score.findOneAndUpdate(
-      { playerName, gameMode, gridSize: 3 }, 
+      { playerName, gameMode, gridSize: 3 }, // always 3x3
       { $inc: { [field]: 1 } },
       { new: true, upsert: true }
     );
@@ -77,7 +71,7 @@ router.post('/update', async (req, res) => {
   }
 });
 
-// DELETE reset scores
+/* DELETE /api/scores/reset/:name — delete all scores for a player */
 router.delete('/reset/:name', async (req, res) => {
   try {
     await Score.deleteMany({ playerName: req.params.name });

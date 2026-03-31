@@ -1,206 +1,108 @@
-// Minimax + Alpha-Beta Pruning (3x3 ONLY)
-// AI = 'O', Human = 'X'
+// AI plays as 'O', human plays as 'X'
+// Uses Alpha-Beta Pruning to find the best move
 
+// All 8 winning combinations for a 3x3 board
+const WIN_LINES = [
+  [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
+  [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
+  [0, 4, 8], [2, 4, 6],             // diagonals
+];
 
-/** Always 3 in a row */
-export function getWinLength() {
-  return 3;
-}
-
-/** Full depth search for perfect play */
-function maxDepth() {
-  return 9;
-}
-
-
-// Build winning lines for 3x3
-function buildLines(size, winLen) {
-  const lines = [];
-
-  for (let r = 0; r < size; r++) {
-    for (let c = 0; c < size; c++) {
-      const i = r * size + c;
-
-      // horizontal
-      if (c + winLen <= size) {
-        const l = [];
-        for (let k = 0; k < winLen; k++) l.push(i + k);
-        lines.push(l);
-      }
-
-      // vertical
-      if (r + winLen <= size) {
-        const l = [];
-        for (let k = 0; k < winLen; k++) l.push(i + k * size);
-        lines.push(l);
-      }
-
-      // diagonal 
-      if (c + winLen <= size && r + winLen <= size) {
-        const l = [];
-        for (let k = 0; k < winLen; k++) l.push(i + k * size + k);
-        lines.push(l);
-      }
-
-      // diagonal 
-      if (c - winLen >= -1 && r + winLen <= size) {
-        const l = [];
-        for (let k = 0; k < winLen; k++) l.push(i + k * size - k);
-        lines.push(l);
-      }
+/* Check if someone has won or if it's a draw.
+   Returns 'X', 'O', 'draw', or null if game is still going. */
+export function checkWinner(board) {
+  for (const line of WIN_LINES) {
+    const [a, b, c] = line;
+    if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+      return board[a]; // return the winner symbol
     }
   }
-
-  return lines;
-}
-
-const lineCache = {};
-function getLines(size, winLen) {
-  const key = `${size}_${winLen}`;
-  if (!lineCache[key]) lineCache[key] = buildLines(size, winLen);
-  return lineCache[key];
-}
-
-
-// Check winner
-export function checkWinner(board, size, winLen) {
-  const lines = getLines(size, winLen);
-
-  for (const line of lines) {
-    const first = board[line[0]];
-    if (first && line.every((idx) => board[idx] === first)) return first;
-  }
-
-  if (board.every((c) => c !== null)) return 'draw';
+  // All 9 cells filled = draw
+  if (board.every((cell) => cell !== null)) return 'draw';
   return null;
 }
 
-
-// Winning line for UI
-export function getWinningLine(board, size, winLen) {
-  const lines = getLines(size, winLen);
-
-  for (const line of lines) {
-    const first = board[line[0]];
-    if (first && line.every((idx) => board[idx] === first)) return line;
+/* Return the array of 3 winning cell indexes, or null if no winner yet. */
+export function getWinningLine(board) {
+  for (const line of WIN_LINES) {
+    const [a, b, c] = line;
+    if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+      return line;
+    }
   }
-
   return null;
 }
 
+/* Alpha-Beta Pruning algorithm.
+   isMax = true means it's AI's turn (maximizing)
+   isMax = false means it's human's turn (minimizing)
+   alpha = best score AI can guarantee so far
+   beta  = best score human can guarantee so far */
+function alphaBeta(board, isMax, alpha, beta) {
+  const result = checkWinner(board);
 
-// Heuristic (not really needed for 3x3 but kept safe)
-function heuristic(board, size, winLen) {
-  const lines = getLines(size, winLen);
-  let score = 0;
-
-  for (const line of lines) {
-    const cells = line.map((i) => board[i]);
-    const oCount = cells.filter((c) => c === 'O').length;
-    const xCount = cells.filter((c) => c === 'X').length;
-
-    if (xCount === 0 && oCount > 0) score += Math.pow(10, oCount);
-    if (oCount === 0 && xCount > 0) score -= Math.pow(10, xCount);
-  }
-
-  return score;
-}
-
-
-// Sort moves (center first)
-function emptySorted(board, size) {
-  const mid = Math.floor(size / 2);
-
-  return board
-    .map((v, i) =>
-      v === null
-        ? { i, d: Math.abs(Math.floor(i / size) - mid) + Math.abs((i % size) - mid) }
-        : null
-    )
-    .filter(Boolean)
-    .sort((a, b) => a.d - b.d)
-    .map((x) => x.i);
-}
-
-
-// Minimax + Alpha-Beta
-function minimax(board, depth, isMax, alpha, beta, size, winLen, limit) {
-
-  const result = checkWinner(board, size, winLen);
-
-  // Base case
-  if (result === 'O') return 1000 - depth;
-  if (result === 'X') return depth - 1000;
-  if (result === 'draw') return 0;
-
-  const cells = emptySorted(board, size);
+  // Base cases: return score when game is over
+  if (result === 'O') return 10;    // AI wins
+  if (result === 'X') return -10;   // Human wins
+  if (result === 'draw') return 0;  // Draw
 
   if (isMax) {
+    // AI turn — try to maximize score
     let best = -Infinity;
 
-    for (const idx of cells) {
-      board[idx] = 'O';
+    for (let i = 0; i < 9; i++) {
+      if (board[i] === null) {
+        board[i] = 'O'; // try this move
+        const score = alphaBeta(board, false, alpha, beta);
+        board[i] = null; // undo move
 
-      //  recursion
-      const s = minimax(board, depth + 1, false, alpha, beta, size, winLen, limit);
+        best = Math.max(best, score);
+        alpha = Math.max(alpha, best);
 
-      board[idx] = null;
-
-      if (s > best) best = s;
-
-      // alpha update
-      if (best > alpha) alpha = best;
-
-      //  pruning
-      if (beta <= alpha) break;
+        // Beta cut-off: human won't allow this path
+        if (beta <= alpha) break;
+      }
     }
-
     return best;
   } else {
+    // Human turn — try to minimize score
     let best = Infinity;
 
-    for (const idx of cells) {
-      board[idx] = 'X';
+    for (let i = 0; i < 9; i++) {
+      if (board[i] === null) {
+        board[i] = 'X'; // try this move
+        const score = alphaBeta(board, true, alpha, beta);
+        board[i] = null; // undo move
 
-      // 🔁 recursion
-      const s = minimax(board, depth + 1, true, alpha, beta, size, winLen, limit);
+        best = Math.min(best, score);
+        beta = Math.min(beta, best);
 
-      board[idx] = null;
-
-      if (s < best) best = s;
-
-      // ✂️ beta update
-      if (best < beta) beta = best;
-
-      // ✂️ pruning
-      if (beta <= alpha) break;
+        // Alpha cut-off: AI won't allow this path
+        if (beta <= alpha) break;
+      }
     }
-
     return best;
   }
 }
 
-
-// Get best move
-export function getBestMove(board, size, winLen) {
-  const limit = maxDepth();
-  const cells = emptySorted(board, size);
-
+/* Find and return the best cell index for the AI to play.
+   Loops over all empty cells, runs alpha-beta for each, picks the best. */
+export function getBestMove(board) {
   let bestScore = -Infinity;
-  let bestMove = cells[0];
+  let bestCell = -1;
 
-  for (const idx of cells) {
-    board[idx] = 'O';
+  for (let i = 0; i < 9; i++) {
+    if (board[i] === null) {
+      board[i] = 'O'; // try placing O here
+      const score = alphaBeta(board, false, -Infinity, Infinity);
+      board[i] = null; // undo
 
-    const score = minimax(board, 0, false, -Infinity, Infinity, size, winLen, limit);
-
-    board[idx] = null;
-
-    if (score > bestScore) {
-      bestScore = score;
-      bestMove = idx;
+      if (score > bestScore) {
+        bestScore = score;
+        bestCell = i;
+      }
     }
   }
 
-  return bestMove;
+  return bestCell;
 }
